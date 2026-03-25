@@ -43,3 +43,42 @@ class LoginRequest(BaseModel):
         if not v or not v.strip():
             raise ValueError("Password is required")
         return v
+    
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(...)
+    new_password: str = Field(...)
+    confirm_password: str = Field(...)
+
+    @field_validator("old_password")
+    @classmethod
+    def validate_old_password(cls, v: str):
+        if not v or not v.strip():
+            raise ValueError("Old password is required")
+        return v
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str):
+        if not v or not v.strip():
+            raise ValueError("New password is required")
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters")
+        return v
+
+    @field_validator("confirm_password")
+    @classmethod
+    def validate_confirm_password(cls, v: str):
+        if not v or not v.strip():
+            raise ValueError("Confirm password is required")
+        return v
+
+    @model_validator(mode="after")
+    def check_passwords(self):
+        if self.new_password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+
+        if self.old_password == self.new_password:
+            raise ValueError("New password must be different from old password")
+
+        return self

@@ -17,3 +17,10 @@ class UserRepository:
         db.commit()
         db.refresh(new_user)
         return new_user
+    
+    @staticmethod
+    def update_user_password(db: Session, user: User, new_password: str):
+        user.password = new_password
+        db.commit()
+        db.refresh(user)
+        return user

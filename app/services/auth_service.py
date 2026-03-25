@@ -61,3 +61,23 @@ class AuthService:
             "access_token": create_access_token({"sub": user_id}),
             "token_type": "bearer"
         }
+    
+    @staticmethod
+    def change_password(user, data, db: Session):
+        if(data.new_password != data.confirm_password):
+            raise HTTPException(status_code=400, detail="New passwords do not match")
+        
+        if(data.old_password == data.new_password):
+            raise HTTPException(status_code=400, detail="New password must be different")
+        
+        if not verify_password(data.old_password, user.password):
+            raise HTTPException(status_code=400, detail="Old password is incorrect")
+
+        new_hashed = hash_password(data.new_password)
+
+        res = UserRepository.update_user_password(db, user, new_hashed)
+
+        if not res:
+            raise HTTPException(status_code=500, detail="Failed to update password")
+
+        return {"message": "Password updated successfully"}
