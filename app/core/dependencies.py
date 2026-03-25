@@ -12,9 +12,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     payload = decode_token(token)
 
     if not payload:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        raise HTTPException(status_code=401, detail="Unauthorized")
     user_id = payload.get("sub")
-    user = UserRepository.get_user_by_email(db, user_id) 
+    user = UserRepository.get_user_by_id(db, int(user_id)) 
     if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(status_code=401, detail="Unauthorized")
     return user
